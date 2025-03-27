@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Updated Title -->
+    <title>Indian Financial Assistant</title>
+    <style>
+      /* --- Japanese Glassmorphism UI --- */
+      :root {
+        /* Adjusted Palette */
+        --color-accent: #6366f1; /* Keeping the nice indigo */
+        --color-background-start: #e0e7ff; /* Soft lavender start */
+        --color-background-end: #f0f9ff; /* Soft sky blue end */
+        --color-surface-bg: rgba(255, 255, 255, 0.15); /* Glass background */
+        --color-surface-border: rgba(255, 255, 255, 0.25); /* Glass border */
+        --color-text-primary: #1f2937; /* Darker text for readability on light glass */
+        --color-text-secondary: #4b5563;
+        --color-input-bg: rgba(255, 255, 255, 0.3);
+        --color-input-border: rgba(255, 255, 255, 0.4);
+        --shadow-color: rgba(99, 102, 241, 0.2); /* Shadow based on accent */
+
+        --boxSize: 8px;
+        --gutter: 4px;
+        --border-radius-main: 1.5rem; /* Slightly larger radius */
+        --border-radius-inner: 0.75rem;
+      }
+
+      /* Apply transition globally */
+      * {
+        transition: background-color 0.3s ease, border-color 0.3s ease,
+          color 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      body {
+        margin: 0;
+        padding: 20px; /* Add some padding */
+        /* Soft Gradient Background */
+        background: linear-gradient(
+          135deg,
+          var(--color-background-start),
+          var(--color-background-end)
+        );
+        background-attachment: fixed; /* Keep gradient fixed during scroll */
+        color: var(--color-text-primary);
+        font-family: "system-ui", -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.6;
+      }
+
+      .header-text {
+        text-align: center;
+        margin-bottom: 2rem;
+        max-width: 600px;
+      }
+
+      .header-text h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--color-accent);
+        margin-bottom: 0.5rem;
+      }
+
+      .header-text p {
+        font-size: 1.1rem;
+        color: var(--color-text-secondary);
+      }
+
+      .header-text .disclaimer {
+        font-size: 0.9rem;
+        color: #ef4444; /* Red for disclaimer */
+        margin-top: 1rem;
+        font-weight: 500;
+      }
+
+      /* Main Glass Container */
+      .container {
+        width: 90%;
+        max-width: 650px; /* Adjusted max-width */
+        background: var(--color-surface-bg);
+        backdrop-filter: blur(15px) saturate(180%);
+        -webkit-backdrop-filter: blur(15px) saturate(180%); /* Safari */
+        border-radius: var(--border-radius-main);
+        border: 1px solid var(--color-surface-border);
+        padding: 2.5rem;
+        box-shadow: 0 8px 32px 0 var(--shadow-color);
+      }
+
+      .wave-container {
+        position: relative;
+        display: flex;
+        min-height: 100px;
+        max-height: 128px;
+        justify-content: center;
+        align-items: center;
+        margin: 2.5rem 0; /* Increased margin */
+      }
+
+      .box-container {
+        display: flex;
+        justify-content: space-between;
+        height: 64px;
+        width: 100%;
+      }
+
+      /* Audio Visualization Bars */
+      .box {
+        height: 100%;
+        width: var(--boxSize);
+        background: var(--color-accent);
+        border-radius: 4px; /* Slightly less rounded bars */
+        transform-origin: bottom;
+        transition: transform 0.05s ease-out; /* Smoother transition */
+      }
+
+      .controls {
+        display: grid;
+        gap: 1.5rem; /* Increased gap */
+        margin-bottom: 2.5rem; /* Increased margin */
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      label {
+        font-size: 0.9rem; /* Slightly smaller label */
+        font-weight: 500;
+        color: var(--color-text-secondary);
+      }
+
+      input,
+      select {
+        padding: 0.8rem 1rem; /* Adjusted padding */
+        border-radius: var(--border-radius-inner);
+        border: 1px solid var(--color-input-border);
+        background-color: var(--color-input-bg);
+        color: var(--color-text-primary);
+        font-size: 1rem;
+        /* Subtle inner shadow for depth */
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        outline: none; /* Remove default outline */
+      }
+
+      input:focus,
+      select:focus {
+        border-color: var(--color-accent);
+        /* Glow effect on focus */
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+      }
+
+      /* Style select dropdown arrow (optional, basic example) */
+      select {
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234B5563%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 0.65em auto;
+        padding-right: 2.5rem; /* Make space for arrow */
+      }
+
+      /* Button Styling */
+      button#start-button {
+        padding: 0.9rem 1.5rem; /* Adjusted padding */
+        border-radius: var(--border-radius-inner);
+        border: none;
+        background-color: var(--color-accent);
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        /* Add subtle shadow to button */
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        transition: all 0.2s ease-out;
+        display: flex; /* Ensure inner divs align correctly */
+        align-items: center;
+        justify-content: center;
+        min-height: 50px; /* Ensure consistent height */
+      }
+
+      button#start-button:hover {
+        filter: brightness(1.1); /* Brighter on hover */
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
+      }
+
+      /* Spinner and Pulse Styles within Button */
+      .icon-with-spinner,
+      .pulse-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-width: 180px; /* Keep min-width */
+        color: white; /* Ensure text is white */
+      }
+
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.8); /* Slightly transparent border */
+        border-top-color: white; /* Solid top color */
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        flex-shrink: 0;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .pulse-circle {
+        width: 12px; /* Smaller pulse */
+        height: 12px;
+        border-radius: 50%;
+        background-color: white;
+        /* Animation for pulsing opacity based on audio level */
+        animation: pulse-opacity 1.5s infinite ease-in-out;
+        transform: scale(
+          var(--audio-level, 1)
+        ); /* Still scale based on level */
+        transition: transform 0.1s ease;
+        flex-shrink: 0;
+      }
+
+      /* Optional: Add a subtle pulse animation */
+      @keyframes pulse-opacity {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 0.8;
+        }
+      }
+
+      /* Toast Notification Styling */
+      .toast {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 1rem 1.5rem; /* Adjusted padding */
+        border-radius: var(--border-radius-inner);
+        font-size: 0.9rem; /* Adjusted size */
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        /* Glassy Toasts */
+        backdrop-filter: blur(10px) saturate(180%);
+        -webkit-backdrop-filter: blur(10px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white; /* Default white text */
+        font-weight: 500;
+      }
+
+      .toast.error {
+        background-color: rgba(239, 68, 68, 0.7); /* Red with transparency */
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      .toast.warning {
+        background-color: rgba(245, 158, 11, 0.7); /* Amber with transparency */
+        border-color: rgba(255, 255, 255, 0.3);
+        color: #1f2937; /* Darker text for yellow background */
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Add toast element after body opening tag -->
+    <div id="error-toast" class="toast"></div>
+
+    <!-- Updated Header Text -->
+    <div class="header-text">
+      <h1>Indian Financial Assistant</h1>
+      <p>
+        Speak your questions about Indian finance (stocks, mutual funds, taxes,
+        PPF, etc.).
+      </p>
+      <p class="disclaimer">
+        Disclaimer: This AI provides information for educational purposes only
+        and is NOT a registered financial advisor. Always consult a qualified
+        professional before making financial decisions.
+      </p>
+      <!-- Link to Gemini Key -->
+      <p style="font-size: 0.9rem; margin-top: 1rem">
+        Get a Gemini API key
+        <a
+          href="https://ai.google.dev/gemini-api/docs/api-key"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="color: var(--color-accent); text-decoration: none"
+          >here</a
+        >
+      </p>
+    </div>
+    <!-- End Updated Header -->
+
+    <div class="container">
+      <div class="controls">
+        <div class="input-group">
+          <label for="api-key">API Key</label>
+          <input
+            type="password"
+            id="api-key"
+            placeholder="Enter your API key"
+          />
+        </div>
+        <div class="input-group">
+          <label for="voice">Voice</label>
+          <select id="voice">
+            <option value="Puck" selected>Puck</option>
+            <!-- Keep default selected -->
+            <option value="Charon">Charon</option>
+            <option value="Kore">Kore</option>
+            <option value="Fenrir">Fenrir</option>
+            <option value="Aoede">Aoede</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="wave-container">
+        <div class="box-container">
+          <!-- Boxes will be dynamically added here -->
+        </div>
+      </div>
+
+      <button id="start-button">Start Recording</button>
+    </div>
+
+    <audio id="audio-output" style="display: none"></audio>
+    <!-- Hide the default player -->
+
+    <!-- JAVASCRIPT REMAINS UNCHANGED -->
+    <script>
+      let peerConnection;
+      let audioContext;
+      let dataChannel;
+      let isRecording = false;
+      let webrtc_id;
+      let analyser; // Declare analyser globally for visualization
+      let dataArray; // Declare dataArray globally
+      let analyser_input; // For input level
+      let dataArray_input; // For input level
+      let animationId; // Declare animationId globally
+
+      const startButton = document.getElementById("start-button");
+      const apiKeyInput = document.getElementById("api-key");
+      const voiceSelect = document.getElementById("voice");
+      const audioOutput = document.getElementById("audio-output");
+      const boxContainer = document.querySelector(".box-container");
+
+      const numBars = 32;
+      for (let i = 0; i < numBars; i++) {
+        const box = document.createElement("div");
+        box.className = "box";
+        boxContainer.appendChild(box);
+      }
+
+      function updateButtonState() {
+        const buttonContent = startButton.querySelector("div"); // Get the inner div if it exists
+
+        if (
+          peerConnection &&
+          (peerConnection.connectionState === "connecting" ||
+            peerConnection.connectionState === "new")
+        ) {
+          // Only update if not already showing spinner
+          if (
+            !buttonContent ||
+            !buttonContent.classList.contains("icon-with-spinner")
+          ) {
+            startButton.innerHTML = `
+                      <div class="icon-with-spinner">
+                          <div class="spinner"></div>
+                          <span>Connecting...</span>
+                      </div>
+                  `;
+          }
+        } else if (
+          peerConnection &&
+          peerConnection.connectionState === "connected"
+        ) {
+          // Only update if not already showing pulse
+          if (
+            !buttonContent ||
+            !buttonContent.classList.contains("pulse-container")
+          ) {
+            startButton.innerHTML = `
+                      <div class="pulse-container">
+                          <div class="pulse-circle"></div>
+                          <span>Stop Recording</span>
+                      </div>
+                  `;
+          }
+        } else {
+          // Only update if not already showing default text
+          if (
+            startButton.textContent.trim() !== "Start Recording" ||
+            buttonContent
+          ) {
+            startButton.innerHTML = "Start Recording";
+          }
+        }
+      }
+
+      function showError(message) {
+        const toast = document.getElementById("error-toast");
+        toast.textContent = message;
+        toast.className = "toast error";
+        toast.style.display = "block";
+
+        // Hide toast after 5 seconds
+        setTimeout(() => {
+          toast.style.display = "none";
+        }, 5000);
+      }
+
+      function cleanupAudioContext() {
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+        if (audioContext) {
+          audioContext
+            .close()
+            .catch((e) => console.error("Error closing audio context:", e));
+          audioContext = null;
+          analyser = null;
+          dataArray = null;
+          analyser_input = null;
+          dataArray_input = null;
+        }
+      }
+
+      async function setupWebRTC() {
+        // Ensure previous context is closed if connection is retried
+        cleanupAudioContext();
+
+        const rtcConfig = __RTC_CONFIGURATION__; // Use the injected config
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        webrtc_id = Math.random().toString(36).substring(7);
+        updateButtonState(); // Show connecting state immediately
+
+        const timeoutId = setTimeout(() => {
+          if (
+            peerConnection &&
+            peerConnection.connectionState !== "connected"
+          ) {
+            const toast = document.getElementById("error-toast");
+            toast.textContent =
+              "Connection is taking longer than usual. Check console or network. (VPN?)";
+            toast.className = "toast warning";
+            toast.style.display = "block";
+
+            // Hide warning after 7 seconds
+            setTimeout(() => {
+              toast.style.display = "none";
+            }, 7000);
+          }
+        }, 8000); // Increased timeout slightly
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              // Optional: Add constraints if needed, e.g., specific sample rate
+              // sampleRate: 16000,
+              echoCancellation: true,
+              noiseSuppression: true,
+            },
+          });
+          stream
+            .getTracks()
+            .forEach((track) => peerConnection.addTrack(track, stream));
+
+          // --- Setup Input Audio Level Visualization ---
+          audioContext = new AudioContext(); // Create new context
+          analyser_input = audioContext.createAnalyser();
+          const source_input = audioContext.createMediaStreamSource(stream);
+          source_input.connect(analyser_input);
+          analyser_input.fftSize = 64; // Smaller FFT for faster level analysis
+          analyser_input.smoothingTimeConstant = 0.5; // Some smoothing
+          dataArray_input = new Uint8Array(analyser_input.frequencyBinCount);
+
+          function updateInputAudioLevel() {
+            if (!analyser_input) return; // Stop if analyser is gone
+            analyser_input.getByteFrequencyData(dataArray_input);
+            // Calculate average volume
+            let sum = 0;
+            for (let i = 0; i < dataArray_input.length; i++) {
+              sum += dataArray_input[i];
+            }
+            const average = sum / dataArray_input.length;
+            // Scale the average (0-255) to a smaller range for subtle scaling (e.g., 0-1)
+            const audioLevel = Math.min(1, average / 100); // Adjust divisor for sensitivity
+
+            const pulseCircle = document.querySelector(".pulse-circle");
+            if (pulseCircle && peerConnection.connectionState === "connected") {
+              // Scale between 1 and 1.5 based on level
+              pulseCircle.style.setProperty(
+                "--audio-level",
+                1 + audioLevel * 0.5
+              );
+            } else if (pulseCircle) {
+              pulseCircle.style.setProperty("--audio-level", 1); // Reset if not connected
+            }
+
+            if (isRecording) {
+              // Only continue if still recording
+              requestAnimationFrame(updateInputAudioLevel);
+            }
+          }
+          // Start input level animation loop only if context created
+          if (audioContext) {
+            updateInputAudioLevel();
+          }
+          // --- End Input Level Vis ---
+
+          // Add connection state change listener
+          peerConnection.addEventListener("connectionstatechange", () => {
+            console.log(
+              "connectionstatechange",
+              peerConnection.connectionState
+            );
+            if (peerConnection.connectionState === "connected") {
+              clearTimeout(timeoutId); // Clear the long connection warning
+              const toast = document.getElementById("error-toast");
+              toast.style.display = "none"; // Hide any active warning/error
+            } else if (
+              ["disconnected", "failed", "closed"].includes(
+                peerConnection.connectionState
+              )
+            ) {
+              clearTimeout(timeoutId);
+              stopWebRTC(); // Ensure cleanup on failure/closure
+              isRecording = false; // Update state variable
+            }
+            updateButtonState(); // Update button visuals
+          });
+
+          // Handle incoming audio track
+          peerConnection.addEventListener("track", (evt) => {
+            console.log("Audio track received");
+            if (audioOutput && evt.track.kind === "audio") {
+              if (
+                !audioOutput.srcObject ||
+                audioOutput.srcObject !== evt.streams[0]
+              ) {
+                audioOutput.srcObject = evt.streams[0];
+                audioOutput
+                  .play()
+                  .catch((e) => console.error("Audio play failed:", e));
+
+                // --- Set up Output Audio Visualization ---
+                // Ensure audio context exists (might be closed/recreated)
+                if (!audioContext) {
+                  audioContext = new AudioContext();
+                }
+                // Only create analyser if it doesn't exist or context was recreated
+                if (!analyser || analyser.context.state === "closed") {
+                  analyser = audioContext.createAnalyser();
+                  analyser.fftSize = 64; // Match numBars * 2
+                  analyser.smoothingTimeConstant = 0.8; // Adjust smoothing
+                  dataArray = new Uint8Array(analyser.frequencyBinCount); // Should be 32
+                }
+
+                try {
+                  const source_output = audioContext.createMediaStreamSource(
+                    evt.streams[0]
+                  );
+                  source_output.connect(analyser);
+                  // Start output visualization loop only if analyser is ready
+                  if (analyser && !animationId) {
+                    // Prevent multiple loops
+                    updateVisualization();
+                  }
+                } catch (e) {
+                  console.error("Error connecting output analyser:", e);
+                }
+                // --- End Output Vis Setup ---
+              }
+            }
+          });
+
+          // Create data channel for messages (errors, control signals)
+          dataChannel = peerConnection.createDataChannel("control"); // Use a descriptive name
+          dataChannel.onopen = () => {
+            console.log("Data channel opened");
+            // Send initial config info now that channel is open
+            if (peerConnection.connectionState === "connected") {
+              sendInputConfig();
+            }
+          };
+          dataChannel.onclose = () => console.log("Data channel closed");
+          dataChannel.onerror = (error) =>
+            console.error("Data channel error:", error);
+          dataChannel.onmessage = (event) => {
+            console.log("Data channel message:", event.data);
+            try {
+              const eventJson = JSON.parse(event.data);
+              if (eventJson.type === "error") {
+                showError(eventJson.message || "Received error from server");
+              }
+              // Handle other message types if needed
+            } catch (e) {
+              console.error("Failed to parse data channel message:", e);
+            }
+          };
+
+          // Create and send offer
+          console.log("Creating offer...");
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          console.log("Local description set");
+
+          console.log("Waiting for ICE gathering...");
+          await new Promise((resolve) => {
+            if (peerConnection.iceGatheringState === "complete") {
+              resolve();
+            } else {
+              const checkState = () => {
+                console.log(
+                  "ICE gathering state:",
+                  peerConnection.iceGatheringState
+                );
+                if (peerConnection.iceGatheringState === "complete") {
+                  peerConnection.removeEventListener(
+                    "icegatheringstatechange",
+                    checkState
+                  );
+                  resolve();
+                }
+              };
+              peerConnection.addEventListener(
+                "icegatheringstatechange",
+                checkState
+              );
+            }
+          });
+          console.log("ICE gathering complete.");
+
+          // Send offer to backend
+          console.log("Sending offer to /webrtc/offer");
+          const response = await fetch("/webrtc/offer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sdp: peerConnection.localDescription.sdp,
+              type: peerConnection.localDescription.type,
+              webrtc_id: webrtc_id,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Server responded with status ${response.status}`);
+          }
+
+          const serverResponse = await response.json();
+          console.log("Received answer:", serverResponse);
+
+          if (serverResponse.status === "failed") {
+            const errorMsg =
+              serverResponse.meta?.error === "concurrency_limit_reached"
+                ? `Too many connections. Max limit: ${
+                    serverResponse.meta?.limit || "N/A"
+                  }`
+                : serverResponse.meta?.error || "Unknown server error";
+            showError(errorMsg);
+            stopWebRTC(); // Call full cleanup
+            return; // Stop further execution
+          }
+
+          if (!serverResponse.sdp || !serverResponse.type) {
+            throw new Error("Invalid answer received from server");
+          }
+
+          // Set remote description (the answer)
+          await peerConnection.setRemoteDescription(serverResponse);
+          console.log("Remote description set.");
+
+          // If data channel didn't open immediately, try sending config again now
+          if (dataChannel.readyState !== "open") {
+            console.log("Data channel not open yet, will send config onopen");
+          } else {
+            sendInputConfig(); // Send config if already open
+          }
+        } catch (err) {
+          clearTimeout(timeoutId);
+          console.error("Error setting up WebRTC:", err);
+          showError(
+            `Connection failed: ${err.message}. Check mic permissions & console.`
+          );
+          stopWebRTC(); // Ensure cleanup on error
+        }
+      }
+
+      // Function to send API Key and Voice
+      function sendInputConfig() {
+        if (dataChannel && dataChannel.readyState === "open") {
+          console.log("Sending input config via /input_hook");
+          fetch("/input_hook", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              webrtc_id: webrtc_id,
+              api_key: apiKeyInput.value || "", // Send empty string if blank
+              voice_name: voiceSelect.value,
+            }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                console.error(
+                  `Input hook failed with status ${response.status}`
+                );
+                // Optionally show a non-critical error to user
+              }
+              return response.json();
+            })
+            .then((data) => console.log("Input hook response:", data))
+            .catch((error) => {
+              console.error("Error calling input hook:", error);
+              // Optionally show a non-critical error to user
+            });
+        } else {
+          console.warn("Cannot send input config, data channel not open.");
+        }
+      }
+
+      // Output Visualization Loop
+      function updateVisualization() {
+        if (!analyser || !isRecording) {
+          // Stop the loop if analyser is gone or not recording
+          animationId = null; // Clear animation ID
+          // Optionally reset bars to 0
+          const bars = document.querySelectorAll(".box");
+          bars.forEach((bar) => (bar.style.transform = "scaleY(0.05)"));
+          return;
+        }
+
+        analyser.getByteFrequencyData(dataArray); // Get data (size = 32)
+        const bars = document.querySelectorAll(".box"); // Should be 32 bars
+
+        // Ensure we don't go out of bounds
+        const numDrawableBars = Math.min(bars.length, dataArray.length);
+
+        for (let i = 0; i < numDrawableBars; i++) {
+          // Map frequency data (0-255) to bar height (e.g., 0-1 or higher)
+          // Apply some scaling - lower frequencies often louder, higher ones quieter
+          const scaleFactor = 1 + (i / numDrawableBars) * 0.5; // Gently boost higher bars
+          let barHeight = (dataArray[i] / 255) * scaleFactor;
+
+          // Apply a minimum height and cap the maximum
+          barHeight = Math.max(0.05, Math.min(1.5, barHeight)); // Min height 5%, max 150%
+
+          bars[i].style.transform = `scaleY(${barHeight})`;
+        }
+
+        // Continue the loop
+        animationId = requestAnimationFrame(updateVisualization);
+      }
+
+      function stopWebRTC() {
+        console.log("Stopping WebRTC...");
+        isRecording = false; // Set recording state to false first
+
+        if (peerConnection) {
+          // Remove listeners to prevent errors during closing
+          peerConnection.onconnectionstatechange = null;
+          peerConnection.ontrack = null;
+          peerConnection.onicegatheringstatechange = null;
+
+          // Close tracks
+          peerConnection.getSenders().forEach((sender) => {
+            if (sender.track) {
+              sender.track.stop();
+            }
+          });
+          peerConnection.getReceivers().forEach((receiver) => {
+            if (receiver.track) {
+              receiver.track.stop();
+            }
+          });
+
+          // Close data channel
+          if (dataChannel) {
+            dataChannel.onopen = null;
+            dataChannel.onclose = null;
+            dataChannel.onerror = null;
+            dataChannel.onmessage = null;
+            if (dataChannel.readyState === "open") {
+              dataChannel.close();
+            }
+            dataChannel = null;
+          }
+
+          // Close peer connection
+          if (peerConnection.connectionState !== "closed") {
+            peerConnection.close();
+          }
+          peerConnection = null; // Nullify the object
+        }
+
+        // Stop visualization and cleanup audio context
+        cleanupAudioContext();
+
+        // Reset visualization bars
+        const bars = document.querySelectorAll(".box");
+        bars.forEach((bar) => (bar.style.transform = "scaleY(0.05)"));
+
+        // Update button state after cleanup
+        updateButtonState();
+        // Ensure the audio element is paused and reset
+        if (audioOutput) {
+          audioOutput.pause();
+          audioOutput.srcObject = null;
+        }
+        console.log("WebRTC stopped.");
+      }
+
+      startButton.addEventListener("click", () => {
+        // Prevent double clicks / race conditions
+        startButton.disabled = true;
+
+        if (!isRecording) {
+          console.log("Start button clicked - connecting...");
+          isRecording = true; // Set state early
+          setupWebRTC().finally(() => {
+            // Re-enable button after setup attempt (success or failure)
+            startButton.disabled = false;
+            updateButtonState(); // Ensure button reflects final state
+          });
+          // No need to add 'recording' class here, updateButtonState handles visuals
+        } else {
+          console.log("Stop button clicked - disconnecting...");
+          // isRecording will be set to false inside stopWebRTC
+          stopWebRTC();
+          // Re-enable button after stopping
+          startButton.disabled = false;
+          updateButtonState(); // Ensure button reflects final state
+        }
+        // No need for isRecording = !isRecording here anymore
+      });
+
+      // Optional: Add cleanup on page unload
+      window.addEventListener("beforeunload", () => {
+        if (isRecording) {
+          stopWebRTC();
+        }
+      });
+    </script>
+  </body>
+</html>
